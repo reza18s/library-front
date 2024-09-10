@@ -1,4 +1,3 @@
-import { Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,14 +5,33 @@ import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 
 export default function DataGridC() {
-  const handleClick = (event: any, cellValues: any) => {
-    alert(`Row data: ${JSON.stringify(cellValues.row)}`);
+  const handleSave = async (event: any, cellValues: any) => {
+    try {
+      const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cellValues.row),
+        method: 'put',
+      });
+      if (!response.ok) throw new Error('Failed to delete genre');
+      console.log("res=",response);
+      
+      await queryClient.invalidateQueries(
+        {
+          queryKey: ['genres'],
+          refetchType: 'active',
+        },
+        { throwOnError: true},
+      )
+      alert('Genre deleted successfully');
+    } catch (error) {
+      console.error(error);
+      alert('Error deleting genre: ' + error);
+    }
+
   };
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   
-  const handleRemove = async (event: any,cellValues: any) => {
-    console.log(JSON.stringify(cellValues.row.id));
-  
+  const handleRemove = async (event: any,cellValues: any) => {  
     try {
       const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
         method: 'DELETE',
@@ -44,11 +62,10 @@ export default function DataGridC() {
     },
   });
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
     {
       field: 'name',
       headerName: 'Name',
-      width: 150,
+      width: 200,
       editable: true,
     },
     {
@@ -58,7 +75,7 @@ export default function DataGridC() {
       renderCell: (cellValues) => {
         return (
           <>
-            <SaveIcon onClick={(event) => handleClick(event, cellValues)} />
+            <SaveIcon onClick={(event) => handleSave(event, cellValues)} />
             <CloseIcon sx={{ ml: 1 }} onClick={(event) => handleRemove(event, cellValues)} />
           </>
         );
