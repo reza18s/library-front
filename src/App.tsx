@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {Button, Typography, Box, Container } from '@mui/material';
 import ModalGenre from "./components/genre/ModalGenre";
+import ModalAuthor from "./components/author/ModalAuthor";
 
 const fetchUsers = async () => {
   const response = await fetch('http://localhost:3000/genre');
@@ -28,8 +29,9 @@ function App() {
       <Typography variant="h4" component="h1" gutterBottom>Hello Vite + React!</Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <ModalGenre/>
+        <ModalAuthor/>
 
-        <Button variant="contained" color="primary">Author</Button>
+        {/* <Button variant="contained" color="primary">Author</Button> */}
       </Box>
     </Container>
       <h1>Hello Vite + React</h1>

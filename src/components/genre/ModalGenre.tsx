@@ -78,7 +78,7 @@ export default function ModalGenre() {
                   onChange={(e) => setGenreName({...genreName, name: e.target.value})} // Update state on input change
  />
               </FormControl>
-              <Button type="submit">Add new genre</Button>
+              <Button disabled={!genreName.name} type="submit">Add new genre</Button>
             </Stack>
           </form>
           <DataGridC />

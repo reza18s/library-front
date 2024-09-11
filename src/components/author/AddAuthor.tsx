@@ -3,9 +3,8 @@ import Button from '@mui/joy/Button';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
 import DialogTitle from '@mui/joy/DialogTitle';
-import DataGridC from './DataGridC';
 
-export default function ModalGenre() {
+export default function ModalAuthor() {
   const [open, setOpen] = React.useState<boolean>(false);
   return (
     <React.Fragment>
@@ -14,12 +13,11 @@ export default function ModalGenre() {
         color="neutral"
         onClick={() => setOpen(true)}
       >
-        Genre
+        Author
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog>
           <DialogTitle sx={{ ml: 3 }}>Genre</DialogTitle>
-          <DataGridC />
           <Button>Add new genre</Button>
         </ModalDialog>
       </Modal>
