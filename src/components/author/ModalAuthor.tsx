@@ -6,10 +6,7 @@ import Input from '@mui/joy/Input';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
 import DialogTitle from '@mui/joy/DialogTitle';
-import DialogContent from '@mui/joy/DialogContent';
 import Stack from '@mui/joy/Stack';
-import Add from '@mui/icons-material/Add';
-// import DataGridC from './DataGridC';
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TextField } from '@mui/material';
 import DataGridAuthor from './DataGridAuthor';
@@ -29,6 +26,8 @@ export default function ModalAuthor() {
   const [authorName, setAuthorName] = React.useState<authorObject>(authorObject);
   const queryClient = useQueryClient();
   const [onEdit, setOnedit] = React.useState<number>(-1);
+  const [filter, setFilter] = React.useState<string>('');
+  const [filterData, setFilterData] = React.useState<any>();
   const { data, error, isLoading } = useQuery({
     queryKey: ["authors"],
     queryFn: async () => {
@@ -37,6 +36,7 @@ export default function ModalAuthor() {
       return response.json();
     },
   });
+
   React.useEffect(() => {
     if (onEdit === -1) {
       setAuthorName({
@@ -46,20 +46,17 @@ export default function ModalAuthor() {
       });
     } else {
       const foundObject = data.find((obj: any) => obj.id === onEdit);
-      console.log("useEffect",foundObject);
       if (foundObject) {
         setAuthorName(foundObject);
       }
-    }
-    
-    console.log("onEdit=",onEdit);
-    console.log("data=",data);
-    
+    }    
   }, [onEdit]);
   
   const handleClose = () => {
     setOpen(false);
     setOnedit(-1);
+    setFilter('');
+    setFilterData(null);
   };
   const handleSubmit = async () => {
     if (onEdit === -1) {
@@ -88,7 +85,7 @@ export default function ModalAuthor() {
         const response = await fetch(`http://localhost:3000/author/${onEdit}`, {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(authorName),
-          method: 'put',
+          method: 'PUT',
         });
         if (!response.ok) throw new Error('Failed to delete author');
         
@@ -108,7 +105,14 @@ export default function ModalAuthor() {
     }
     setAuthorName({name: '', biography: '', birthday: ''});
   };
-
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const filteredNames = data.filter((author: any) => author.name.toLowerCase().startsWith(filter.toLowerCase()));
+      setFilterData(filteredNames);
+    }
+  };
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;  
   return (
     <React.Fragment>
       <Button
@@ -155,7 +159,13 @@ export default function ModalAuthor() {
               <Button disabled={!authorName.name || !authorName.biography || !authorName.birthday} type="submit">{onEdit === -1 ? 'Add' : 'Update'}</Button>
             </Stack>
           </form>
-          <DataGridAuthor data={data} setOnedit={setOnedit} />
+          <FormLabel>Filter by name</FormLabel>
+          <Input 
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />          
+          <DataGridAuthor  data={filterData ? filterData : data} setOnedit={setOnedit} />
         </ModalDialog>
       </Modal>
     </React.Fragment>

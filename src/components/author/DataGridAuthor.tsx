@@ -3,6 +3,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
+import { format } from 'date-fns';
+
 
 interface ChildComponentProps {
   data: any;
@@ -23,8 +25,6 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete author');
-      console.log("res=",response);
-      
       await queryClient.invalidateQueries(
         {
           queryKey: ['authors'],
@@ -59,13 +59,16 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
       editable: false,
       headerName: 'Biography',
       width: 200,
-    },    
+    },     
     {
       field: 'birthday',
-      editable: false,
       headerName: 'Birthday',
-      width: 200,
-    },    
+      width: 150,
+      valueFormatter: (params: any) => {
+        if (!params.value) return '';
+        return format(new Date(params.value as string), 'dd/MM/yyyy');
+      },
+    }, 
     {
       field: 'action',
       headerName: 'Action',
@@ -85,6 +88,7 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
 
 
   // Ensure data is in the correct format
+  
   const rows = data.map((author: any) => ({
     id: author.id,
     name: author.name,

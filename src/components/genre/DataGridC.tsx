@@ -13,7 +13,6 @@ export default function DataGridC() {
         method: 'put',
       });
       if (!response.ok) throw new Error('Failed to delete genre');
-      console.log("res=",response);
       
       await queryClient.invalidateQueries(
         {
@@ -37,7 +36,6 @@ export default function DataGridC() {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete genre');
-      console.log("res=",response);
       
       await queryClient.invalidateQueries(
         {
@@ -85,7 +83,7 @@ export default function DataGridC() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  console.log("data", data);
+  ("data", data);
 
   // Ensure data is in the correct format
   const rows = data.map((genre: any) => ({
