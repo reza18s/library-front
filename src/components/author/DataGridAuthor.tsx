@@ -89,17 +89,17 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
 
   // Ensure data is in the correct format
   
-  const rows = data.map((author: any) => ({
-    id: author.id,
-    name: author.name,
-    biography: author.biography,
-    birthday: author.birthday
-  }));
+  // const rows = data.map((author: any) => ({
+  //   id: author.id,
+  //   name: author.name,
+  //   biography: author.biography,
+  //   birthday: author.birthday
+  // }));
 
   return (
     <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}  // Pass correctly formatted rows
+        rows={data}  // Pass correctly formatted rows
         columns={columns}
         initialState={{
           pagination: {

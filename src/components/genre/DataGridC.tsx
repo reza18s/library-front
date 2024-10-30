@@ -83,7 +83,6 @@ export default function DataGridC() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  ("data", data);
 
   // Ensure data is in the correct format
   const rows = data.map((genre: any) => ({
