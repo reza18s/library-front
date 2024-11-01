@@ -32,8 +32,8 @@ export default function ModalBook() {
     publication_year: '',
     copies_available: '',
     total_copies: '',
-    author_id: '',
-    genre_id: ''
+    author_id: Number,
+    genre_id: Number
   })
 useEffect(() => {
   console.log("genreLoading", genreLoading);
@@ -41,25 +41,63 @@ useEffect(() => {
   if (!genreLoading && !authorLoading) {
     setGenreID(genre[0].id);
     setAuthorID(author[0].id);
+    setBook({
+      title: '',
+      publication_year: '',
+      copies_available: '',
+      total_copies: '',
+      author_id: author[0].id,
+      genre_id: genre[0].id
+    })
   }
 }, [genre, author]);
   console.log(genre, author);
   const handleClose = () => {
     setOpen(false);
   };
-  // const options = ['Option 1', 'Option 2', 'Option 3'];
-  console.log("genreID", genreID);
-  console.log("authorID", authorID);
-  const genreItems = genre?.map((genre: { id: React.Key | readonly string[] | null | undefined; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+  const updateBook = (updatedFields: any) => {
+    setBook((prevBook) => ({
+      ...prevBook,         // Keep existing fields
+      ...updatedFields     // Update only the fields specified in updatedFields
+    }));
+  };
+  const genreItems = genre?.map((genre: { id: any | null | undefined; name: string }) => (
     <MenuItem key={genre.id} value={genre.id}>
       {genre.name}  
     </MenuItem>
   ))
-  const authorItems = author?.map((author: { id: React.Key | readonly string[] | null | undefined; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+  const authorItems = author?.map((author: { id: any | null | undefined; name: string }) => (
     <MenuItem key={author.id} value={author.id}>
       {author.name}  
     </MenuItem>
   ))
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => { 
+    event.preventDefault(); 
+    alert(JSON.stringify(book));
+
+    try {
+      const response = await fetch('http://localhost:3000/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(book),
+      });
+      if (!response.ok) throw new Error('Failed to add book');
+      alert('Book added successfully');
+    } catch (error) {
+      console.error(error);
+      alert('Error adding book');
+    }
+    setOpen(false);
+    setBook({
+      title: '',
+      publication_year: '', 
+      copies_available: '',
+      total_copies: '',
+      author_id: Number,
+      genre_id: Number
+      })
+  }
+
     return (
         <React.Fragment>
         <Button
@@ -75,38 +113,38 @@ useEffect(() => {
             <form
               onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
-                // handleSubmit();
+                handleSubmit(event);
               }}
             >
-              <Stack spacing={2}>
-                <FormControl>
+              <Stack >
+                <FormControl sx={{ mb: 2 }} fullWidth>
                     <FormLabel>Title</FormLabel>
-                    <Input 
+                    <Input sx={{ mb: 2 }}  
                     autoFocus 
                     required
                     value={book.title}
                     onChange={(e) => setBook({...book, title: e.target.value})} // Update state on input change
                     />
-              <FormControl fullWidth>
+              <FormControl sx={{ mb: 2 }} fullWidth>
                 <InputLabel id="demo-simple-select-label">Genre</InputLabel>
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={genreID}
+                  labelId="genre_id"
+                  id="genre_id"
+                  value={book.genre_id}
                   label="Genre"
-                  onChange={(event) => setGenreID(Number(event.target.value))}
+                  onChange={(event) => updateBook({ genre_id: Number(event.target.value) })}
                   >
                   {genreItems}
                 </Select>
               </FormControl>                    
-              <FormControl fullWidth>
+              <FormControl sx={{ mb: 2 }} fullWidth>
                 <InputLabel id="demo-simple-select-label">authorID</InputLabel>
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
+                  labelId="genre_id"
+                  id="author_id"
                   value={authorID}
                   label="author"
-                  onChange={(event) => setAuthorID(Number(event.target.value))}
+                  onChange={(event) => updateBook({ author_id: Number(event.target.value) })}
                   >
                   {authorItems}
                 </Select>
