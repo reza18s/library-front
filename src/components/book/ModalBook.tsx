@@ -5,7 +5,7 @@ import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ModalBook() {
 
-  // const queryClient = useQueryClient();  // Correct way to access QueryClient
+  const queryClient = useQueryClient();  // Correct way to access QueryClient
   const { data:genre, error:genreError, isLoading:genreLoading } = useQuery({
     queryKey: ["genres"],
     queryFn: async () => {
@@ -25,8 +25,8 @@ export default function ModalBook() {
   // if (genreLoading || authorLoading) return <div>Loading...</div>;
   // if (genreError || authorError) return <div>Error occurred!</div>;
   const [open, setOpen] = React.useState<boolean>(false);
-  const [genreID, setGenreID] = React.useState<number>();
-  const [authorID, setAuthorID] = React.useState<number>();
+  // const [genreID, setGenreID] = React.useState<number>();
+  // const [authorID, setAuthorID] = React.useState<number>();
   const [book, setBook] = React.useState({
     title: '',
     publication_year: '',
@@ -36,11 +36,10 @@ export default function ModalBook() {
     genre_id: Number
   })
 useEffect(() => {
-  console.log("genreLoading", genreLoading);
   
   if (!genreLoading && !authorLoading) {
-    setGenreID(genre[0].id);
-    setAuthorID(author[0].id);
+    // setGenreID(genre[0].id);
+    // setAuthorID(author[0].id);
     setBook({
       title: '',
       publication_year: '',
@@ -51,7 +50,6 @@ useEffect(() => {
     })
   }
 }, [genre, author]);
-  console.log(genre, author);
   const handleClose = () => {
     setOpen(false);
   };
@@ -83,6 +81,13 @@ useEffect(() => {
       });
       if (!response.ok) throw new Error('Failed to add book');
       alert('Book added successfully');
+      await queryClient.invalidateQueries(
+        {
+          queryKey: ['genres'],
+          refetchType: 'active',
+        },
+        { throwOnError: true},
+      )
     } catch (error) {
       console.error(error);
       alert('Error adding book');
@@ -142,7 +147,7 @@ useEffect(() => {
                 <Select
                   labelId="genre_id"
                   id="author_id"
-                  value={authorID}
+                  value={book.author_id}
                   label="author"
                   onChange={(event) => updateBook({ author_id: Number(event.target.value) })}
                   >

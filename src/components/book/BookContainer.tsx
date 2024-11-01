@@ -17,7 +17,6 @@ export default function BookContainer() {
     });
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
-    console.log(data);
     const columns: GridColDef[] = [
         {
           field: 'title',
