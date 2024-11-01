@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import ModalBook from "./ModalBook";
 import EditIcon from '@mui/icons-material/Save';
@@ -7,9 +7,19 @@ import { useState } from "react";
 import { Button } from "@mui/material";
 
 export default function BookContainer() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
 
-    
+  const [book, setBook] = useState({
+    title: '',
+    publication_year: '',
+    copies_available: '',
+    total_copies: '',
+    author_id: Number,
+    genre_id: Number
+  })
+  const queryClient = useQueryClient();  // Correct way to access QueryClient
+
     const { data, error, isLoading } = useQuery({
         queryKey: ["book"],
         queryFn: async () => {
@@ -22,10 +32,32 @@ export default function BookContainer() {
     if (error) return <div>Error: {error.message}</div>;
 
     const handleEdit = (event: any, cellValues: any) => {
-        console.log(cellValues.row);
+        // console.log(cellValues.row);
+        setBook(cellValues.row);
+        setOpen(true);
+        setEditMode(true);
+
     }
     const handleRemove = (event: any, cellValues: any) => {
         console.log(cellValues.row.id);
+        fetch(`http://localhost:3000/book/${cellValues.row.id}`, {
+            method: 'DELETE',
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+            window.location.reload();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+        queryClient.invalidateQueries(
+          {
+            queryKey: ['book'],
+            refetchType: 'active',
+          },
+          { throwOnError: true},
+        )
     }
     const columns: GridColDef[] = [
         {
@@ -71,9 +103,15 @@ export default function BookContainer() {
       ];
     return (
         <>
-          {/* <Button onClick={() => setOpen(true)}>Add book</Button>
-          <ModalBook open={open} setOpen={setOpen} /> */}
-          <ModalBook />
+          <Button onClick={() => setOpen(true)}>Add book</Button>
+          <ModalBook 
+            open={open} 
+            setOpen={setOpen} 
+            book={book} 
+            setBook={setBook} 
+            edit={editMode} setEdit={setEditMode}  
+          />
+          {/* <ModalBook /> */}
           <DataGrid
               rows={data}  // Pass correctly formatted rows
               columns={columns}

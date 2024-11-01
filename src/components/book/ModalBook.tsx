@@ -3,7 +3,19 @@ import { Button, DialogTitle, FormControl, FormLabel, Input, InputLabel, MenuIte
 import React, { useEffect } from "react";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function ModalBook(updateData: object) {
+
+interface ModalBookProps {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  book: any
+  setBook: React.Dispatch<React.SetStateAction<any>>
+  edit?: boolean
+  setEdit: React.Dispatch<React.SetStateAction<any>>
+
+}
+export default function ModalBook({ open, setOpen, book, setBook, edit, setEdit }: ModalBookProps) {
+  console.log(open);
+  
 
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   const { data:genre, error:genreError, isLoading:genreLoading } = useQuery({
@@ -24,15 +36,15 @@ export default function ModalBook(updateData: object) {
   });
   if (genreLoading || authorLoading) return <div>Loading...</div>;
   if (genreError || authorError) return <div>Error occurred!</div>;
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [book, setBook] = React.useState({
-    title: '',
-    publication_year: '',
-    copies_available: '',
-    total_copies: '',
-    author_id: Number,
-    genre_id: Number
-  })
+  // const [open, setOpen] = React.useState<boolean>(false);
+  // const [book, setBook] = React.useState({
+  //   title: '',
+  //   publication_year: '',
+  //   copies_available: '',
+  //   total_copies: '',
+  //   author_id: Number,
+  //   genre_id: Number
+  // })
 useEffect(() => {
   
   if (!genreLoading && !authorLoading) {
@@ -68,26 +80,42 @@ useEffect(() => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => { 
     event.preventDefault(); 
     alert(JSON.stringify(book));
-
-    try {
-      const response = await fetch('http://localhost:3000/book', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(book),
-      });
-      if (!response.ok) throw new Error('Failed to add book');
-      alert('Book added successfully');
-      await queryClient.invalidateQueries(
-        {
-          queryKey: ['genres'],
-          refetchType: 'active',
-        },
-        { throwOnError: true},
-      )
-    } catch (error) {
-      console.error(error);
-      alert('Error adding book');
+    if (edit) {
+      try {
+        const response = await fetch(`http://localhost:3000/book/${book.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(book),
+        });
+        if (!response.ok) throw new Error('Failed to update book');
+        alert('Book updated successfully');
+        setEdit(false);
+        // setOpen(false);
+      } catch (error) {
+        console.error(error);
+        alert('Error updating book');
+      }
+    }else {
+      try {
+        const response = await fetch('http://localhost:3000/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(book),
+        });
+        if (!response.ok) throw new Error('Failed to add book');
+        alert('Book added successfully');
+      } catch (error) {
+        console.error(error);
+        alert('Error adding book');
+      }
     }
+    await queryClient.invalidateQueries(
+      {
+        queryKey: ['book'],
+        refetchType: 'active',
+      },
+      { throwOnError: true},
+    )
     setBook({
       title: '',
       publication_year: '', 
@@ -96,18 +124,19 @@ useEffect(() => {
       author_id: Number,
       genre_id: Number
       })
+
     setOpen(false);
   }
 
     return (
         <React.Fragment>
-        <Button
+        {/* <Button
           sx={{ m: 1 }}
           variant="outlined"
           onClick={() => setOpen(true)}
         >
-          Add book
-        </Button>
+          {edit ? 'Edit Book' : 'Add Book'}
+        </Button> */}
         <Modal open={open} onClose={() => handleClose() }>
           <ModalDialog>
             <DialogTitle sx={{ ml: 3 }}>Book</DialogTitle>
@@ -179,7 +208,7 @@ useEffect(() => {
                     !book.total_copies || 
                     !book.publication_year || 
                     !book.author_id ||
-                    !book.genre_id} type="submit">Add</Button>
+                    !book.genre_id} type="submit">{edit ? 'Update' : 'Add'}</Button>
               </Stack>
             </form>
           </ModalDialog>
