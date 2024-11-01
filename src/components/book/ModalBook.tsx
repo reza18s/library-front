@@ -3,7 +3,7 @@ import { Button, DialogTitle, FormControl, FormLabel, Input, InputLabel, MenuIte
 import React, { useEffect } from "react";
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export default function ModalBook() {
+export default function ModalBook(updateData: object) {
 
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   const { data:genre, error:genreError, isLoading:genreLoading } = useQuery({
@@ -22,11 +22,9 @@ export default function ModalBook() {
       return response.json();
     },
   });
-  // if (genreLoading || authorLoading) return <div>Loading...</div>;
-  // if (genreError || authorError) return <div>Error occurred!</div>;
+  if (genreLoading || authorLoading) return <div>Loading...</div>;
+  if (genreError || authorError) return <div>Error occurred!</div>;
   const [open, setOpen] = React.useState<boolean>(false);
-  // const [genreID, setGenreID] = React.useState<number>();
-  // const [authorID, setAuthorID] = React.useState<number>();
   const [book, setBook] = React.useState({
     title: '',
     publication_year: '',
@@ -38,9 +36,7 @@ export default function ModalBook() {
 useEffect(() => {
   
   if (!genreLoading && !authorLoading) {
-    // setGenreID(genre[0].id);
-    // setAuthorID(author[0].id);
-    setBook({
+      setBook({
       title: '',
       publication_year: '',
       copies_available: '',
@@ -92,7 +88,6 @@ useEffect(() => {
       console.error(error);
       alert('Error adding book');
     }
-    setOpen(false);
     setBook({
       title: '',
       publication_year: '', 
@@ -101,6 +96,7 @@ useEffect(() => {
       author_id: Number,
       genre_id: Number
       })
+    setOpen(false);
   }
 
     return (
@@ -186,13 +182,6 @@ useEffect(() => {
                     !book.genre_id} type="submit">Add</Button>
               </Stack>
             </form>
-            {/* <FormLabel>Filter by name</FormLabel>
-            <Input 
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />          
-            <DataGridAuthor  data={filterData ? filterData : data} setOnedit={setOnedit} /> */}
           </ModalDialog>
         </Modal>
       </React.Fragment>

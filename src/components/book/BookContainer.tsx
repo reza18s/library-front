@@ -1,10 +1,13 @@
-import { Button } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { format } from "date-fns";
 import ModalBook from "./ModalBook";
+import EditIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Save';
+import { useState } from "react";
+import { Button } from "@mui/material";
 
 export default function BookContainer() {
+  const [open, setOpen] = useState(false);
 
     
     const { data, error, isLoading } = useQuery({
@@ -17,6 +20,13 @@ export default function BookContainer() {
     });
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
+
+    const handleEdit = (event: any, cellValues: any) => {
+        console.log(cellValues.row);
+    }
+    const handleRemove = (event: any, cellValues: any) => {
+        console.log(cellValues.row.id);
+    }
     const columns: GridColDef[] = [
         {
           field: 'title',
@@ -52,8 +62,8 @@ export default function BookContainer() {
           renderCell: (cellValues) => {
             return (
               <>
-                {/* <SaveIcon onClick={(event) => handleSave(event, cellValues)} />
-                <CloseIcon sx={{ ml: 1 }} onClick={(event) => handleRemove(event, cellValues)} /> */}
+                <EditIcon onClick={(event) => handleEdit(event, cellValues)} />
+                <CloseIcon sx={{ ml: 1 }} onClick={(event) => handleRemove(event, cellValues)} />
               </>
             );
           },
@@ -61,19 +71,21 @@ export default function BookContainer() {
       ];
     return (
         <>
-            <ModalBook />
-            <DataGrid
-                rows={data}  // Pass correctly formatted rows
-                columns={columns}
-                initialState={{
-                pagination: {
-                    paginationModel: {
-                    pageSize: 5,
-                    },
-                },
-                }}
-                pageSizeOptions={[5]}
-            />
-        </>
+          {/* <Button onClick={() => setOpen(true)}>Add book</Button>
+          <ModalBook open={open} setOpen={setOpen} /> */}
+          <ModalBook />
+          <DataGrid
+              rows={data}  // Pass correctly formatted rows
+              columns={columns}
+              initialState={{
+              pagination: {
+                  paginationModel: {
+                  pageSize: 5,
+                  },
+              },
+              }}
+              pageSizeOptions={[5]}
+          />
+      </>
     )
 }
