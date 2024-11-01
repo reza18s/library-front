@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import ModalBook from "./ModalBook";
 import EditIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
 import { useState } from "react";
 import { Button } from "@mui/material";
 
@@ -76,15 +76,15 @@ export default function BookContainer() {
             headerName: 'Genre',
             width: 200,
         },     
-        // {
-        //   field: 'publication_year',
-        //   headerName: 'Publication year',
-        //   width: 150,
-        //   valueFormatter: (params: any) => {
-        //     if (!params.value) return '';
-        //     return format(new Date(params.value as string), 'dd/MM/yyyy');
-        //   },
-        // }, 
+        {
+          field: 'publication_year',
+          headerName: 'Publication year',
+          width: 300,
+          // valueFormatter: (params: any) => {
+          //   if (!params.value) return '';
+          //   return format(new Date(params.value as string), 'dd/MM/yyyy');
+          // },
+        }, 
         {
           field: 'action',
           headerName: 'Action',
@@ -107,7 +107,8 @@ export default function BookContainer() {
             setOpen={setOpen} 
             book={book} 
             setBook={setBook} 
-            edit={editMode} setEdit={setEditMode}  
+            isEdit={editMode}
+            setEdit={setEditMode}  
           />
           <DataGrid
               rows={data}  // Pass correctly formatted rows
