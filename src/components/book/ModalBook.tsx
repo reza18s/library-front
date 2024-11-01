@@ -1,7 +1,7 @@
 import { ModalDialog } from "@mui/joy";
 import { Button, DialogTitle, FormControl, FormLabel, Input, InputLabel, MenuItem, Modal, Select, Stack, TextField } from "@mui/material";
 import React, { useEffect } from "react";
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 interface ModalBookProps {
@@ -14,8 +14,6 @@ interface ModalBookProps {
 
 }
 export default function ModalBook({ open, setOpen, book, setBook, edit, setEdit }: ModalBookProps) {
-  console.log(open);
-  
 
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   const { data:genre, error:genreError, isLoading:genreLoading } = useQuery({
@@ -36,16 +34,7 @@ export default function ModalBook({ open, setOpen, book, setBook, edit, setEdit 
   });
   if (genreLoading || authorLoading) return <div>Loading...</div>;
   if (genreError || authorError) return <div>Error occurred!</div>;
-  // const [open, setOpen] = React.useState<boolean>(false);
-  // const [book, setBook] = React.useState({
-  //   title: '',
-  //   publication_year: '',
-  //   copies_available: '',
-  //   total_copies: '',
-  //   author_id: Number,
-  //   genre_id: Number
-  // })
-useEffect(() => {
+  useEffect(() => {
   
   if (!genreLoading && !authorLoading) {
       setBook({
@@ -62,7 +51,7 @@ useEffect(() => {
     setOpen(false);
   };
   const updateBook = (updatedFields: any) => {
-    setBook((prevBook) => ({
+    setBook((prevBook: any) => ({
       ...prevBook,         // Keep existing fields
       ...updatedFields     // Update only the fields specified in updatedFields
     }));
@@ -90,7 +79,6 @@ useEffect(() => {
         if (!response.ok) throw new Error('Failed to update book');
         alert('Book updated successfully');
         setEdit(false);
-        // setOpen(false);
       } catch (error) {
         console.error(error);
         alert('Error updating book');
@@ -130,13 +118,6 @@ useEffect(() => {
 
     return (
         <React.Fragment>
-        {/* <Button
-          sx={{ m: 1 }}
-          variant="outlined"
-          onClick={() => setOpen(true)}
-        >
-          {edit ? 'Edit Book' : 'Add Book'}
-        </Button> */}
         <Modal open={open} onClose={() => handleClose() }>
           <ModalDialog>
             <DialogTitle sx={{ ml: 3 }}>Book</DialogTitle>

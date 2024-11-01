@@ -32,20 +32,18 @@ export default function BookContainer() {
     if (error) return <div>Error: {error.message}</div>;
 
     const handleEdit = (event: any, cellValues: any) => {
-        // console.log(cellValues.row);
         setBook(cellValues.row);
         setOpen(true);
         setEditMode(true);
 
     }
     const handleRemove = (event: any, cellValues: any) => {
-        console.log(cellValues.row.id);
         fetch(`http://localhost:3000/book/${cellValues.row.id}`, {
             method: 'DELETE',
         })
         .then((response) => response.json())
-        .then((data) => {
-            console.log('Success:', data);
+        .then(() => {
+            alert('Successfully deleted book');
             window.location.reload();
         })
         .catch((error) => {
@@ -111,7 +109,6 @@ export default function BookContainer() {
             setBook={setBook} 
             edit={editMode} setEdit={setEditMode}  
           />
-          {/* <ModalBook /> */}
           <DataGrid
               rows={data}  // Pass correctly formatted rows
               columns={columns}
