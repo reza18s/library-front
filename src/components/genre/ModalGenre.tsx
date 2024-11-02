@@ -6,11 +6,9 @@ import Input from '@mui/joy/Input';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
 import DialogTitle from '@mui/joy/DialogTitle';
-import DialogContent from '@mui/joy/DialogContent';
 import Stack from '@mui/joy/Stack';
-import Add from '@mui/icons-material/Add';
 import DataGridC from './DataGridC';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface genreObject {
   name: string
@@ -23,9 +21,6 @@ export default function ModalGenre() {
   const [genreName, setGenreName] = React.useState<genreObject>(genreObject);
   const queryClient = useQueryClient();
 
-  const handleClose = () => {
-    setOpen(false);
-  };
   const handleSubmit = async () => {
     try {
       const response = await fetch('http://localhost:3000/genre', {
@@ -76,7 +71,7 @@ export default function ModalGenre() {
                   required
                   value={genreName.name}
                   onChange={(e) => setGenreName({...genreName, name: e.target.value})} // Update state on input change
- />
+                />
               </FormControl>
               <Button disabled={!genreName.name} type="submit">Add new genre</Button>
             </Stack>

@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 import { format } from 'date-fns';
@@ -38,15 +38,7 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
       alert('Error deleting author: ' + error);
     }
   };
-  
-  // const { data, error, isLoading } = useQuery({
-  //   queryKey: ["authors"],
-  //   queryFn: async () => {
-  //     const response = await fetch("http://localhost:3000/author");
-  //     if (!response.ok) throw new Error("Failed to fetch authors");
-  //     return response.json();
-  //   },
-  // });
+
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -63,11 +55,11 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
     {
       field: 'birthday',
       headerName: 'Birthday',
-      width: 150,
-      valueFormatter: (params: any) => {
-        if (!params.value) return '';
-        return format(new Date(params.value as string), 'dd/MM/yyyy');
-      },
+      width: 300,
+      // valueFormatter: (params: any) => {
+      //   if (!params.value) return '';
+      //   return format(new Date(params.value as string), 'dd/MM/yyyy');
+      // },
     }, 
     {
       field: 'action',
@@ -83,18 +75,6 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
       },
     },
   ];
-  // if (isLoading) return <div>Loading...</div>;
-  // if (error) return <div>Error: {error.message}</div>;
-
-
-  // Ensure data is in the correct format
-  
-  // const rows = data.map((author: any) => ({
-  //   id: author.id,
-  //   name: author.name,
-  //   biography: author.biography,
-  //   birthday: author.birthday
-  // }));
 
   return (
     <Box sx={{ height: 400, width: '100%' }}>

@@ -198,7 +198,7 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit:
                 id="filled-hidden-label-small"
                 variant="filled"
                 size="small"
-                label="publication_year"
+                label="publication year"
                 value={book.publication_year }
                 onChange={(e) => setBook({...book, publication_year: e.target.value})}
               />
