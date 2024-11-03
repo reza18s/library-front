@@ -10,82 +10,75 @@ import Stack from '@mui/joy/Stack';
 import DataGridC from './DataGridC';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-interface genreObject {
-  name: string
+interface Genre {
+  id?: number;
+  name: string;
 }
-export default function ModalGenre() {
-  const genreObject = {
-    name: ''
-};
-  const [open, setOpen] = React.useState<boolean>(false);
-  const [genreName, setGenreName] = React.useState<genreObject>(genreObject);
-  const [onEdit, setOnedit] = React.useState<number>(-1);
 
+export default function ModalGenre() {
+  const initialGenre: Genre = { name: '' };
+  const [open, setOpen] = React.useState(false);
+  const [genreName, setGenreName] = React.useState<Genre>(initialGenre);
+  const [onEdit, setOnEdit] = React.useState<number>(-1);
   const queryClient = useQueryClient();
+
+  const { data, error, isLoading } = useQuery<Genre[]>({
+    queryKey: ["genres"],
+    queryFn: async () => {
+      const response = await fetch("http://localhost:3000/genre");
+      if (!response.ok) throw new Error("Failed to fetch genres");
+      return response.json();
+    },
+  });
+
   React.useEffect(() => {
     if (onEdit === -1) {
-      setGenreName({name: ''});
+      setGenreName(initialGenre);
     } else {
-      const foundObject = data.find((obj: any) => obj.id === onEdit);
-      if (foundObject) {
-        setGenreName(foundObject);
-      }
-    }    
-  }, [onEdit]);
+      const foundGenre = data?.find((genre) => genre.id === onEdit);
+      if (foundGenre) setGenreName(foundGenre);
+    }
+  }, [onEdit, data]);
 
-  const { data, error, isLoading } = useQuery({
-  queryKey: ["genres"],
-  queryFn: async () => {
-    const response = await fetch("http://localhost:3000/genre");
-    if (!response.ok) throw new Error("Failed to fetch genres");
-    return response.json();
-  },
-});
-  const handleSubmit = async () => {
+  const handleSubmit = React.useCallback(async () => {
     try {
-      const response = await fetch(
-        onEdit === -1 ? 
-          'http://localhost:3000/genre' : 
-          `http://localhost:3000/genre/${onEdit}`, {
-        method: onEdit === -1 ? 'POST' : 'PUT',
+      const method = onEdit === -1 ? 'POST' : 'PUT';
+      const url = onEdit === -1 ? 'http://localhost:3000/genre' : `http://localhost:3000/genre/${onEdit}`;
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(genreName),
       });
       if (!response.ok) throw new Error(`Failed to ${onEdit === -1 ? 'add' : 'update'} genre`);
-      setGenreName({name: ''});
-      await queryClient.invalidateQueries(
-        {
-          queryKey: ['genres'],
-          refetchType: 'active',
-        },
-        { throwOnError: true},
-      )
+
+      setGenreName(initialGenre);
+      await queryClient.invalidateQueries({ queryKey: ['genres'] }, { throwOnError: true });
       alert(`Genre ${onEdit === -1 ? 'added' : 'updated'} successfully`);
     } catch (error) {
       console.error(error);
       alert(`Error ${onEdit === -1 ? 'adding' : 'updating'} genre: ${error}`);
     }
-  };
-  const handleClose = () => {
+  }, [genreName, onEdit, queryClient]);
+
+  const handleClose = React.useCallback(() => {
     setOpen(false);
-    setOnedit(-1);
-    setGenreName({name: ''});
-  };
+    setOnEdit(-1);
+    setGenreName(initialGenre);
+  }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading genres</div>;
 
   return (
-    <React.Fragment>
-      <Button
-        variant="outlined"
-        color="neutral"
-        onClick={() => setOpen(true)}
-      >
+    <>
+      <Button variant="outlined" color="neutral" onClick={() => setOpen(true)}>
         Genre
       </Button>
       <Modal open={open} onClose={handleClose}>
         <ModalDialog>
           <DialogTitle sx={{ ml: 3 }}>Genre</DialogTitle>
           <form
-            onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+            onSubmit={(event: React.FormEvent) => {
               event.preventDefault();
               handleSubmit();
             }}
@@ -93,19 +86,21 @@ export default function ModalGenre() {
             <Stack spacing={2}>
               <FormControl>
                 <FormLabel>Name</FormLabel>
-                <Input 
-                  autoFocus 
+                <Input
+                  autoFocus
                   required
                   value={genreName.name}
-                  onChange={(e) => setGenreName({...genreName, name: e.target.value})} // Update state on input change
+                  onChange={(e) => setGenreName({ ...genreName, name: e.target.value })}
                 />
               </FormControl>
-              <Button disabled={!genreName.name} type="submit">{onEdit === -1 ? 'Add' : 'Update'} new genre</Button>
+              <Button disabled={!genreName.name} type="submit">
+                {onEdit === -1 ? 'Add' : 'Update'} Genre
+              </Button>
             </Stack>
           </form>
-          <DataGridC data={data} setOnedit={setOnedit} />
+          <DataGridC data={data || []} setOnEdit={setOnEdit} />
         </ModalDialog>
       </Modal>
-    </React.Fragment>
+    </>
   );
 }

@@ -1,63 +1,48 @@
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { useQueryClient } from "@tanstack/react-query";
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
+import React from 'react';
 
-interface ChildComponentProps {
-  data: any;
-  setOnedit: (value: number) => void;
+interface Genre {
+  id: number;
+  name: string;
 }
-export default function DataGridC({ data, setOnedit }: ChildComponentProps) {
-  console.log("data", data);
-  
-  const handleSave = async (event: any, cellValues: any) => {
-    setOnedit(cellValues.row.id);
 
-    // try {
-    //   const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(cellValues.row),
-    //     method: 'put',
-    //   });
-    //   if (!response.ok) throw new Error('Failed to delete genre');
-      
-    //   await queryClient.invalidateQueries(
-    //     {
-    //       queryKey: ['genres'],
-    //       refetchType: 'active',
-    //     },
-    //     { throwOnError: true},
-    //   )
-    //   alert('Genre updated successfully');
-    // } catch (error) {
-    //   console.error(error);
-    //   alert('Error updating genre: ' + error);
-    // }
-  };
-  const queryClient = useQueryClient();  // Correct way to access QueryClient
-  
-  const handleRemove = async (event: any,cellValues: any) => {  
+interface DataGridCProps {
+  data: any;
+  // data: Genre[];
+  setOnEdit: (value: number) => void;
+}
+
+export default function DataGridC({ data, setOnEdit }: DataGridCProps) {
+  const queryClient = useQueryClient();
+
+  const handleSave = React.useCallback(async (id: number) => {
+    setOnEdit(id);
+    // Uncomment and implement saving logic if needed
+    // await updateGenre(id);
+  }, [setOnEdit]);
+
+  const handleRemove = React.useCallback(async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
+      const response = await fetch(`http://localhost:3000/genre/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete genre');
-      
-      await queryClient.invalidateQueries(
-        {
-          queryKey: ['genres'],
-          refetchType: 'active',
-        },
-        { throwOnError: true},
-      )
+
+      await queryClient.invalidateQueries({
+        queryKey: ['genres'],
+        refetchType: 'active',
+      });
       alert('Genre deleted successfully');
     } catch (error) {
       console.error(error);
       alert('Error deleting genre: ' + error);
     }
-  };
-  
+  }, [queryClient]);
+
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -69,20 +54,16 @@ export default function DataGridC({ data, setOnedit }: ChildComponentProps) {
       field: 'action',
       headerName: 'Action',
       width: 100,
-      renderCell: (cellValues) => {
-        return (
-          <>
-            <SaveIcon sx={{ cursor: 'pointer', m: 1 }} onClick={(event) => handleSave(event, cellValues)} />
-            <CloseIcon sx={{ cursor: 'pointer', m: 1 }}  onClick={(event) => handleRemove(event, cellValues)} />
-          </>
-        );
-      },
+      renderCell: (params: GridRenderCellParams) => (
+        <>
+          <SaveIcon sx={{ cursor: 'pointer', m: 1 }} onClick={() => handleSave(params.row.id)} />
+          <CloseIcon sx={{ cursor: 'pointer', m: 1 }} onClick={() => handleRemove(params.row.id)} />
+        </>
+      ),
     },
   ];
 
-
-  // Ensure data is in the correct format
-  const rows = data.map((genre: any) => ({
+  const rows = data.map((genre) => ({
     id: genre.id,
     name: genre.name,
   }));
@@ -90,14 +71,10 @@ export default function DataGridC({ data, setOnedit }: ChildComponentProps) {
   return (
     <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}  // Pass correctly formatted rows
+        rows={rows}
         columns={columns}
         initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
-            },
-          },
+          pagination: { paginationModel: { pageSize: 5 } },
         }}
         pageSizeOptions={[5]}
         checkboxSelection
