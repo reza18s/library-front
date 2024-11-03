@@ -15,7 +15,6 @@ export default function DataGridAuthor({ data, setOnedit }: ChildComponentProps)
   
   const handleSave = async (event: any, cellValues: any) => {
     setOnedit(cellValues.row.id);
-
   };
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   

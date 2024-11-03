@@ -4,29 +4,36 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 
-export default function DataGridC() {
+interface ChildComponentProps {
+  data: any;
+  setOnedit: (value: number) => void;
+}
+export default function DataGridC({ data, setOnedit }: ChildComponentProps) {
+  console.log("data", data);
+  
   const handleSave = async (event: any, cellValues: any) => {
-    try {
-      const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cellValues.row),
-        method: 'put',
-      });
-      if (!response.ok) throw new Error('Failed to delete genre');
-      
-      await queryClient.invalidateQueries(
-        {
-          queryKey: ['genres'],
-          refetchType: 'active',
-        },
-        { throwOnError: true},
-      )
-      alert('Genre deleted successfully');
-    } catch (error) {
-      console.error(error);
-      alert('Error deleting genre: ' + error);
-    }
+    setOnedit(cellValues.row.id);
 
+    // try {
+    //   const response = await fetch(`http://localhost:3000/genre/${cellValues.row.id}`, {
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(cellValues.row),
+    //     method: 'put',
+    //   });
+    //   if (!response.ok) throw new Error('Failed to delete genre');
+      
+    //   await queryClient.invalidateQueries(
+    //     {
+    //       queryKey: ['genres'],
+    //       refetchType: 'active',
+    //     },
+    //     { throwOnError: true},
+    //   )
+    //   alert('Genre updated successfully');
+    // } catch (error) {
+    //   console.error(error);
+    //   alert('Error updating genre: ' + error);
+    // }
   };
   const queryClient = useQueryClient();  // Correct way to access QueryClient
   
@@ -51,14 +58,6 @@ export default function DataGridC() {
     }
   };
   
-  const { data, error, isLoading } = useQuery({
-    queryKey: ["genres"],
-    queryFn: async () => {
-      const response = await fetch("http://localhost:3000/genre");
-      if (!response.ok) throw new Error("Failed to fetch genres");
-      return response.json();
-    },
-  });
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -73,15 +72,14 @@ export default function DataGridC() {
       renderCell: (cellValues) => {
         return (
           <>
-            <SaveIcon onClick={(event) => handleSave(event, cellValues)} />
-            <CloseIcon sx={{ ml: 1 }} onClick={(event) => handleRemove(event, cellValues)} />
+            <SaveIcon sx={{ cursor: 'pointer', m: 1 }} onClick={(event) => handleSave(event, cellValues)} />
+            <CloseIcon sx={{ cursor: 'pointer', m: 1 }}  onClick={(event) => handleRemove(event, cellValues)} />
           </>
         );
       },
     },
   ];
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+
 
   // Ensure data is in the correct format
   const rows = data.map((genre: any) => ({
