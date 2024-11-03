@@ -3,24 +3,27 @@ import Button from '@mui/joy/Button';
 import Modal from '@mui/joy/Modal';
 import ModalDialog from '@mui/joy/ModalDialog';
 import DialogTitle from '@mui/joy/DialogTitle';
+import DialogContent from '@mui/joy/DialogContent';
 
 export default function ModalAuthor() {
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
-    <React.Fragment>
-      <Button
-        variant="outlined"
-        color="neutral"
-        onClick={() => setOpen(true)}
-      >
+    <>
+      <Button variant="outlined" color="neutral" onClick={handleOpen}>
         Author
       </Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal open={open} onClose={handleClose}>
         <ModalDialog>
-          <DialogTitle sx={{ ml: 3 }}>Genre</DialogTitle>
-          <Button>Add new genre</Button>
+          <DialogTitle>Genre</DialogTitle>
+          <DialogContent>
+            <Button onClick={handleClose}>Add new genre</Button>
+          </DialogContent>
         </ModalDialog>
       </Modal>
-    </React.Fragment>
+    </>
   );
 }
