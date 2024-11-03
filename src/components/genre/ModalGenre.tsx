@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Button from '@mui/joy/Button';
+import { Button } from "@mui/material";
 import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import Input from '@mui/joy/Input';
@@ -71,7 +71,7 @@ export default function ModalGenre() {
 
   return (
     <>
-      <Button variant="outlined" color="neutral" onClick={() => setOpen(true)}>
+      <Button variant="contained" onClick={() => setOpen(true)}>
         Genre
       </Button>
       <Modal open={open} onClose={handleClose}>

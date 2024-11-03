@@ -88,7 +88,7 @@ export default function DataGridAuthor() {
 
   return (
     <>
-      <Button variant="contained" onClick={() => setOpen(true)}>Add Book</Button>
+      <Button sx={{ mb: 2 }} variant="contained" onClick={() => setOpen(true)}>Add Book</Button>
       <ModalBook 
         open={open} 
         setOpen={setOpen} 
