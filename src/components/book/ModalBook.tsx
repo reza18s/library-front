@@ -1,21 +1,53 @@
-import { ModalDialog } from "@mui/joy";
-import { Button, DialogTitle, FormControl, FormLabel, Input, InputLabel, MenuItem, Modal, Select, Stack, TextField } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ModalDialog } from '@mui/joy';
 
+import { 
+  Modal,
+  Button,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField } from "@mui/material";
+
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface Author {
+  id: number;
+  name: string;
+}
+
+interface Book {
+  id?: number;
+  title: string;
+  publication_year: string;
+  copies_available: string;
+  total_copies: string;
+  author_id: number;
+  genre_id: number;
+}
 
 interface ModalBookProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  book: any
-  setBook: React.Dispatch<React.SetStateAction<any>>
-  isEdit?: boolean
-  setEdit: React.Dispatch<React.SetStateAction<any>>
+  // book: Book;
+  // setBook: React.Dispatch<React.SetStateAction<Book>>;
+  book: any;
+  setBook: any;
+  isEdit?: boolean;
+  setEdit: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit: edit, setEdit }: ModalBookProps) {
 
-  const queryClient = useQueryClient();  // Correct way to access QueryClient
-  const { data:genre, error:genreError, isLoading:genreLoading } = useQuery({
+export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit, setEdit }: ModalBookProps) {
+  const queryClient = useQueryClient();
+
+  const { data: genres = [], error: genreError, isLoading: genreLoading } = useQuery<Genre[]>({
     queryKey: ["genres"],
     queryFn: async () => {
       const response = await fetch("http://localhost:3000/genre");
@@ -23,7 +55,8 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit:
       return response.json();
     },
   });
-  const { data:author, error:authorError, isLoading:authorLoading } = useQuery({
+
+  const { data: authors = [], error: authorError, isLoading: authorLoading } = useQuery<Author[]>({
     queryKey: ["authors"],
     queryFn: async () => {
       const response = await fetch("http://localhost:3000/author");
@@ -31,188 +64,134 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit:
       return response.json();
     },
   });
+
+  // Set initial state when opening modal for a new book
   useEffect(() => {
-    if (!genreLoading && !authorLoading) {
+    if (open && !isEdit && genres.length && authors.length) {
       setBook({
-      title: '',
-      publication_year: '',
-      copies_available: '',
-      total_copies: '',
-      author_id: author[0].id,
-      genre_id: genre[0].id
-    })
-  }
-  }, [genre, author]);
+        title: '',
+        publication_year: '',
+        copies_available: '',
+        total_copies: '',
+        author_id: authors[0].id,
+        genre_id: genres[0].id,
+      });
+    }
+  }, [open, isEdit, genres, authors, setBook]);
 
-  if (genreLoading || authorLoading) return <div>Loading...</div>;
-  if (genreError || authorError) return <div>Error occurred!</div>;
-
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
+    setOpen(false);
     setEdit(false);
     setBook({
       title: '',
       publication_year: '',
       copies_available: '',
       total_copies: '',
-      author_id: author[0].id,
-      genre_id: genre[0].id
+      author_id: authors[0]?.id || 0,
+      genre_id: genres[0]?.id || 0,
     });
-    setOpen(false);
-  };
-  const updateBook = (updatedFields: any) => {
-    setBook((prevBook: any) => ({
-      ...prevBook,         // Keep existing fields
-      ...updatedFields     // Update only the fields specified in updatedFields
-    }));
-  };
-  const genreItems = genre?.map((genre: { id: any | null | undefined; name: string }) => (
-    <MenuItem key={genre.id} value={genre.id}>
-      {genre.name}  
-    </MenuItem>
-  ))
-  const authorItems = author?.map((author: { id: any | null | undefined; name: string }) => (
-    <MenuItem key={author.id} value={author.id}>
-      {author.name}  
-    </MenuItem>
-  ))
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => { 
-    event.preventDefault(); 
-    if (edit) {
-      try {
-        const response = await fetch(`http://localhost:3000/book/${book.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(book),
-        });
-        if (!response.ok) throw new Error('Failed to update book');
-        alert('Book updated successfully');
-        setEdit(false);
-      } catch (error) {
-        console.error(error);
-        alert('Error updating book');
-      }
-    }else {
-      try {
-        const response = await fetch('http://localhost:3000/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(book),
-        });
-        if (!response.ok) throw new Error('Failed to add book');
-        alert('Book added successfully');
-      } catch (error) {
-        console.error(error);
-        alert('Error adding book');
-      }
-    }
-    await queryClient.invalidateQueries(
-      {
-        queryKey: ['book'],
-        refetchType: 'active',
-      },
-      { throwOnError: true},
-    )
-    setBook({
-      title: '',
-      publication_year: '', 
-      copies_available: '',
-      total_copies: '',
-      author_id: Number,
-      genre_id: Number
-      })
+  }, [setOpen, setEdit, setBook, authors, genres]);
 
-    setOpen(false);
-  }
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const url = isEdit ? `http://localhost:3000/book/${book.id}` : "http://localhost:3000/book";
+      const method = isEdit ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(book),
+      });
+      if (!response.ok) throw new Error(`Failed to ${isEdit ? 'update' : 'add'} book`);
+      
+      alert(`Book ${isEdit ? 'updated' : 'added'} successfully`);
+      await queryClient.invalidateQueries({
+        queryKey: ["books"],
+        refetchType: "active",
+      });
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      alert(`Error ${isEdit ? 'updating' : 'adding'} book`);
+    }
+  };
+
+  if (genreLoading || authorLoading) return <div>Loading...</div>;
+  if (genreError || authorError) return <div>Error loading genres or authors.</div>;
+
   return (
-    <Modal open={open} onClose={() => handleClose() }>
+    <Modal open={open} onClose={handleClose}>
       <ModalDialog>
-        <DialogTitle sx={{ ml: 3 }}>Book</DialogTitle>
-        <form
-          onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
-            event.preventDefault();
-            handleSubmit(event);
-          }}
-        >
-          <Stack >
-            <FormControl sx={{ mb: 2 }} fullWidth>
-              <TextField
-                sx={{ mb: 2 }}
-                autoFocus
-                required
-                id="filled-hidden-label-small"
-                variant="filled"
-                size="small"
-                label="Title"
-                value={book.title }
-                onChange={(e) => setBook({...book, title: e.target.value})}
-              />
-              <FormControl fullWidth>
-                <InputLabel id="genre_id">Genre</InputLabel>
-                <Select
-                  sx={{ mb: 2 }}
-                  labelId="Genre"
-                  id="genre_id"
-                  value={book.genre_id}
-                  label="Genre"
-                  onChange={(event) => updateBook({ genre_id: Number(event.target.value) })}
-                  >
-                  {genreItems}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel id="author_id">Author</InputLabel>
-                <Select
-                  sx={{ mb: 2 }}
-                  labelId="author_id"
-                  id="author_id"
-                  value={book.author_id}
-                  label="author"
-                  onChange={(event) => updateBook({ author_id: Number(event.target.value) })}
-                  >
-                  {authorItems}
-                </Select>
-              </FormControl>
-              <TextField
-                sx={{ mb: 2 }}
-                required
-                id="filled-hidden-label-small"
-                variant="filled"
-                size="small"
-                label="copies available"
-                value={book.copies_available }
-                onChange={(e) => setBook({...book, copies_available: e.target.value})}
-              />
-              <TextField
-                sx={{ mb: 2 }}
-                required
-                id="filled-hidden-label-small"
-                variant="filled"
-                size="small"
-                label="total copies"
-                value={book.total_copies }
-                onChange={(e) => setBook({...book, total_copies: e.target.value})}
-              />
-              <TextField
-                sx={{ mb: 2 }}
-                required
-                id="filled-hidden-label-small"
-                variant="filled"
-                size="small"
-                label="publication year"
-                value={book.publication_year }
-                onChange={(e) => setBook({...book, publication_year: e.target.value})}
-              />
+        <DialogTitle>Book</DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              required
+              label="Title"
+              variant="filled"
+              size="small"
+              value={book.title}
+              onChange={(e) => setBook({ ...book, title: e.target.value })}
+            />
+            <FormControl fullWidth variant="filled" size="small">
+              <InputLabel>Genre</InputLabel>
+              <Select
+                value={book.genre_id}
+                onChange={(e) => setBook({ ...book, genre_id: Number(e.target.value) })}
+              >
+                {genres.map((genre) => (
+                  <MenuItem key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </MenuItem>
+                ))}
+              </Select>
             </FormControl>
-            <Button disabled={
-                !book.title || 
-                !book.copies_available || 
-                !book.total_copies || 
-                !book.publication_year || 
-                !book.author_id ||
-                !book.genre_id} type="submit">{edit ? 'Update' : 'Add'}</Button>
+            <FormControl fullWidth variant="filled" size="small">
+              <InputLabel>Author</InputLabel>
+              <Select
+                value={book.author_id}
+                onChange={(e) => setBook({ ...book, author_id: Number(e.target.value) })}
+              >
+                {authors.map((author) => (
+                  <MenuItem key={author.id} value={author.id}>
+                    {author.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              required
+              label="Copies Available"
+              variant="filled"
+              size="small"
+              value={book.copies_available}
+              onChange={(e) => setBook({ ...book, copies_available: e.target.value })}
+            />
+            <TextField
+              required
+              label="Total Copies"
+              variant="filled"
+              size="small"
+              value={book.total_copies}
+              onChange={(e) => setBook({ ...book, total_copies: e.target.value })}
+            />
+            <TextField
+              required
+              label="Publication Year"
+              variant="filled"
+              size="small"
+              value={book.publication_year}
+              onChange={(e) => setBook({ ...book, publication_year: e.target.value })}
+            />
+            <Button
+              type="submit"
+              disabled={!book.title || !book.copies_available || !book.total_copies || !book.publication_year}
+            >
+              {isEdit ? "Update" : "Add"} Book
+            </Button>
           </Stack>
         </form>
       </ModalDialog>
     </Modal>
-    )
+  );
 }

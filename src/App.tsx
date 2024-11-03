@@ -1,7 +1,7 @@
 import {Typography, Box } from '@mui/material';
 import ModalGenre from "./components/genre/ModalGenre";
 import ModalAuthor from "./components/author/ModalAuthor";
-import BookContainer from "./components/book/BookContainer";
+import DataGridAuthor from "./components/book/DataGridAuthor";
 
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
         </Box>
       </Box>
       <Box>
-        <BookContainer />
+        <DataGridAuthor />
       </Box>
 
     </>

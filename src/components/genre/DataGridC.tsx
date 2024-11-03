@@ -26,6 +26,8 @@ export default function DataGridC({ data, setOnEdit }: DataGridCProps) {
   }, [setOnEdit]);
 
   const handleRemove = React.useCallback(async (id: number) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this genre?');
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`http://localhost:3000/genre/${id}`, {
         method: 'DELETE',

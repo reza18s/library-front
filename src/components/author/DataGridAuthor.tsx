@@ -26,6 +26,8 @@ export default function DataGridAuthor({ data, setOnEdit }: ChildComponentProps)
   };
 
   const handleRemove = async (event: React.MouseEvent, cellValues: { row: Author }) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this author?');
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`http://localhost:3000/author/${cellValues.row.id}`, {
         method: 'DELETE',
