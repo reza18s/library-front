@@ -29,6 +29,8 @@ interface Book {
   publication_year: string;
   copies_available: string;
   total_copies: string;
+  genres: Genre[];
+  authors: Author[];
   author_id: number;
   genre_id: number;
 }
@@ -46,7 +48,8 @@ interface ModalBookProps {
 
 export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit, setEdit }: ModalBookProps) {
   const queryClient = useQueryClient();
-
+  console.log('book in modal', book);
+  
   const { data: genres = [], error: genreError, isLoading: genreLoading } = useQuery<Genre[]>({
     queryKey: ["genres"],
     queryFn: async () => {
@@ -73,6 +76,8 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit,
         publication_year: '',
         copies_available: '',
         total_copies: '',
+        genres: [],
+        authors: [],
         author_id: authors[0].id,
         genre_id: genres[0].id,
       });
@@ -87,6 +92,8 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit,
       publication_year: '',
       copies_available: '',
       total_copies: '',
+      genres: [],
+      authors: [],
       author_id: authors[0]?.id || 0,
       genre_id: genres[0]?.id || 0,
     });

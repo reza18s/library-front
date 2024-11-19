@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+
 import ModalBook from "./ModalBook";
 import EditIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,6 +13,8 @@ interface Book {
   publication_year: string;
   copies_available: string;
   total_copies: string;
+  genres: object[];
+  authors: object[];
   author_id: number | null; // Assuming id could be null if not set
   genre_id: number | null; // Assuming id could be null if not set
   author_name?: string; // Optional for display
@@ -25,6 +28,8 @@ export default function DataGridAuthor() {
   const [book, setBook] = useState<Book>({
     id: 0, // Default id; adjust based on your needs
     title: '',
+    genres: [],
+    authors: [],
     publication_year: '',
     copies_available: '',
     total_copies: '',
@@ -40,10 +45,11 @@ export default function DataGridAuthor() {
       return response.json();
     },
   });
-
+  console.log('books', books);
+  
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-
+  
   const handleEdit = (event: any, cellValues: any) => {
     setBook(cellValues.row);
     setOpen(true);
@@ -70,9 +76,23 @@ export default function DataGridAuthor() {
 
   const columns: GridColDef[] = [
     { field: 'title', headerName: 'Title', width: 200 },
-    { field: 'author_name', headerName: 'Author', width: 200 },
-    { field: 'genre_name', headerName: 'Genre', width: 200 },
-    { field: 'publication_year', headerName: 'Publication Year', width: 300 },
+    {
+      field: 'genres',
+      headerName: 'Genres',
+      width: 200,
+      valueGetter: (params: []) => {
+        return params?.map((genre: { name: string }) => genre.name).join(', ') || 'No genres';
+      }    
+    },
+    {
+      field: 'authors',
+      headerName: 'Authors',
+      width: 200,
+      valueGetter: (params: []) => {
+        return params?.map((author: { name: string }) => author.name).join(', ') || 'No authors';
+      }
+    },
+    { field: 'publication_year', headerName: 'Publication Year', width: 150 },
     {
       field: 'action',
       headerName: 'Action',
@@ -85,7 +105,9 @@ export default function DataGridAuthor() {
       ),
     },
   ];
-
+  
+  console.log(book);
+  
   return (
     <>
       <Button sx={{ mb: 2 }} variant="contained" onClick={() => setOpen(true)}>Add Book</Button>
