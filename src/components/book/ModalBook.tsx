@@ -1,6 +1,9 @@
 import React, { useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ModalDialog } from '@mui/joy';
+import { Grid, ModalDialog } from '@mui/joy';
+import { styled } from '@mui/material/styles';
+import AvatarList from "./AvatarList";
+
 
 import { 
   Modal,
@@ -11,7 +14,9 @@ import {
   MenuItem,
   Select,
   Stack,
-  TextField } from "@mui/material";
+  TextField, 
+  Typography,
+  List} from "@mui/material";
 
 interface Genre {
   id: number;
@@ -101,26 +106,29 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit,
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const url = isEdit ? `http://localhost:3000/book/${book.id}` : "http://localhost:3000/book";
-      const method = isEdit ? "PUT" : "POST";
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(book),
-      });
-      if (!response.ok) throw new Error(`Failed to ${isEdit ? 'update' : 'add'} book`);
+    console.log('Updated book', book.genres);
+    alert(JSON.stringify(book));
+
+    // try {
+    //   const url = isEdit ? `http://localhost:3000/book/${book.id}` : "http://localhost:3000/book";
+    //   const method = isEdit ? "PUT" : "POST";
+    //   const response = await fetch(url, {
+    //     method,
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(book),
+    //   });
+    //   if (!response.ok) throw new Error(`Failed to ${isEdit ? 'update' : 'add'} book`);
       
-      alert(`Book ${isEdit ? 'updated' : 'added'} successfully`);
-      await queryClient.invalidateQueries({
-        queryKey: ["books"],
-        refetchType: "active",
-      });
-      handleClose();
-    } catch (error) {
-      console.error(error);
-      alert(`Error ${isEdit ? 'updating' : 'adding'} book`);
-    }
+    //   alert(`Book ${isEdit ? 'updated' : 'added'} successfully`);
+    //   await queryClient.invalidateQueries({
+    //     queryKey: ["books"],
+    //     refetchType: "active",
+    //   });
+    //   handleClose();
+    // } catch (error) {
+    //   console.error(error);
+    //   alert(`Error ${isEdit ? 'updating' : 'adding'} book`);
+    // }
   };
 
   if (genreLoading || authorLoading) return <div>Loading...</div>;
@@ -152,6 +160,7 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit,
                   </MenuItem>
                 ))}
               </Select>
+
             </FormControl>
             <FormControl fullWidth variant="filled" size="small">
               <InputLabel>Author</InputLabel>
@@ -166,6 +175,15 @@ export default function ModalAddEditBook({ open, setOpen, book, setBook, isEdit,
                 ))}
               </Select>
             </FormControl>
+            <AvatarList
+              items={book.authors}
+              onDelete={(id: number) =>
+                setBook({
+                  ...book,
+                  authors: book.authors.filter((author: { id: number; }) => author.id !== id),
+                })
+              }
+            />
             <TextField
               required
               label="Copies Available"
