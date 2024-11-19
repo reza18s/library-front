@@ -21,7 +21,7 @@ interface Book {
   genre_name?: string; // Optional for display
 }
 
-export default function DataGridAuthor() {
+export default function DataGridBooks() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -45,7 +45,6 @@ export default function DataGridAuthor() {
       return response.json();
     },
   });
-  console.log('books', books);
   
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -105,9 +104,7 @@ export default function DataGridAuthor() {
       ),
     },
   ];
-  
-  console.log(book);
-  
+    
   return (
     <>
       <Button sx={{ mb: 2 }} variant="contained" onClick={() => setOpen(true)}>Add Book</Button>
