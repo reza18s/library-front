@@ -1,8 +1,16 @@
 import React from "react";
-import { Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, Grid2 } from "@mui/material";
+import {
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Avatar,
+  ListItemText,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FolderIcon from "@mui/icons-material/Folder";
-import Grid from '@mui/material/Grid2';
+import Grid from "@mui/material/Grid2";
 
 import { styled } from "@mui/system";
 
@@ -20,17 +28,17 @@ const Demo = styled("div")(({ theme }) => ({
 }));
 
 interface Props {
-    items: { id: number; name: string }[];
-    onDelete: (id: number) => void;
-  }
+  items: { id: number; name: string }[];
+  onDelete: (id: number) => void;
+}
 interface AvatarListProps {
-items: { id: number; name: string }[];
-onDelete: (id: number) => void;
+  items: { id: number; name: string }[];
+  onDelete: (id: number) => void;
 }
 
-  function AvatarList({ items, onDelete }: AvatarListProps) {
-    return (
-    <Grid item xs={12} md={6}>
+function AvatarList({ items, onDelete }: AvatarListProps) {
+  return (
+    <Grid spacing={{ xs: 12, md: 6 }} container component="div">
       <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
         Avatar with Text and Icon
       </Typography>
@@ -40,7 +48,11 @@ onDelete: (id: number) => void;
             <ListItem
               key={item.id}
               secondaryAction={
-                <IconButton edge="end" aria-label="delete" onClick={() => onDelete(item.id)}>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => onDelete(item.id)}
+                >
                   <DeleteIcon />
                 </IconButton>
               }
@@ -57,7 +69,7 @@ onDelete: (id: number) => void;
       </Demo>
     </Grid>
   );
-};
+}
 
 // Example usage
 const App = () => {

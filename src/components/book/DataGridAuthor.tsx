@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 import ModalBook from "./ModalBook";
-import EditIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
 import { Button } from "@mui/material";
 
 interface Book {
@@ -27,17 +27,21 @@ export default function DataGridBooks() {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [book, setBook] = useState<Book>({
     id: 0, // Default id; adjust based on your needs
-    title: '',
+    title: "",
     genres: [],
     authors: [],
-    publication_year: '',
-    copies_available: '',
-    total_copies: '',
+    publication_year: "",
+    copies_available: "",
+    total_copies: "",
     author_id: null,
     genre_id: null,
   });
 
-  const { data: books = [], error, isLoading } = useQuery<Book[]>({
+  const {
+    data: books = [],
+    error,
+    isLoading,
+  } = useQuery<Book[]>({
     queryKey: ["books"],
     queryFn: async () => {
       const response = await fetch("http://localhost:3000/book");
@@ -45,10 +49,10 @@ export default function DataGridBooks() {
       return response.json();
     },
   });
-  
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  
+
   const handleEdit = (event: any, cellValues: any) => {
     setBook(cellValues.row);
     setOpen(true);
@@ -56,65 +60,78 @@ export default function DataGridBooks() {
   };
 
   const handleRemove = async (event: any, cellValues: any) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this book?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this book?"
+    );
     if (!confirmDelete) return;
 
     try {
       await fetch(`http://localhost:3000/book/${cellValues.row.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      alert('Successfully deleted book');
+      alert("Successfully deleted book");
       queryClient.invalidateQueries({
-        queryKey: ['books']
+        queryKey: ["books"],
       }); // Refetch after deletion
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error deleting book. Please try again.');
+      console.error("Error:", error);
+      alert("Error deleting book. Please try again.");
     }
   };
 
   const columns: GridColDef[] = [
-    { field: 'title', headerName: 'Title', width: 200 },
+    { field: "title", headerName: "Title", width: 200 },
     {
-      field: 'genres',
-      headerName: 'Genres',
+      field: "genres",
+      headerName: "Genres",
       width: 200,
       valueGetter: (params: []) => {
-        return params?.map((genre: { name: string }) => genre.name).join(', ') || 'No genres';
-      }    
+        return (
+          params?.map((genre: { name: string }) => genre.name).join(", ") ||
+          "No genres"
+        );
+      },
     },
     {
-      field: 'authors',
-      headerName: 'Authors',
+      field: "authors",
+      headerName: "Authors",
       width: 200,
       valueGetter: (params: []) => {
-        return params?.map((author: { name: string }) => author.name).join(', ') || 'No authors';
-      }
+        return (
+          params?.map((author: { name: string }) => author.name).join(", ") ||
+          "No authors"
+        );
+      },
     },
-    { field: 'publication_year', headerName: 'Publication Year', width: 150 },
+    { field: "publication_year", headerName: "Publication Year", width: 150 },
     {
-      field: 'action',
-      headerName: 'Action',
+      field: "action",
+      headerName: "Action",
       width: 100,
       renderCell: (cellValues) => (
         <>
           <EditIcon onClick={(event) => handleEdit(event, cellValues)} />
-          <CloseIcon sx={{ ml: 1 }} onClick={(event) => handleRemove(event, cellValues)} />
+          <CloseIcon
+            sx={{ ml: 1 }}
+            onClick={(event) => handleRemove(event, cellValues)}
+          />
         </>
       ),
     },
   ];
-    
+
   return (
     <>
-      <Button sx={{ mb: 2 }} variant="contained" onClick={() => setOpen(true)}>Add Book</Button>
-      <ModalBook 
-        open={open} 
-        setOpen={setOpen} 
-        book={book} 
-        setBook={setBook} 
-        isEdit={editMode} 
-        setEdit={setEditMode} 
+      <Button sx={{ mb: 2 }} variant="contained" onClick={() => setOpen(true)}>
+        Add Book
+      </Button>
+      <ModalBook
+        open={open}
+        setOpen={setOpen}
+        book={book}
+        setBook={setBook}
+        isEdit={editMode}
+        setEdit={setEditMode}
       />
       <DataGrid
         rows={books} // Pass correctly formatted rows
